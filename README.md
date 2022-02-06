@@ -3,8 +3,8 @@ Create a console program in Java that can recursively traverse and download www.
 
 # How do I think 
 
-1. I should find all valid links with 200 response 
-2. I should use multithreading 
-3. I need to save all files on my local machine
-4. Handle all possible errors which are could come out
+1. I should find all valid links with 200 response DONE!
+2. I should use multithreading DONE!
+3. I need to save all files on my local machine DONE!
+4. Handle all possible errors which are could come out 
 5. Test all methods
