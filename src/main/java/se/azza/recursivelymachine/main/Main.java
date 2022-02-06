@@ -1,9 +1,9 @@
 package se.azza.recursivelymachine.main;
 
 import org.apache.log4j.Logger;
-import se.azza.recursivelymachine.model.RecursivelyMachine;
+import se.azza.recursivelymachine.model.CpuIntensiveTask;
+import se.azza.recursivelymachine.service.RecursivelyMachineSaverImpl;
 
-import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,23 +14,14 @@ public class Main {
     public static void main(String[] args) {
         logger.info("Recursively Machine is started!");
         int coreCount = Runtime.getRuntime().availableProcessors();
-        logger.info("core totaly: " + coreCount);
+        logger.info("Core amount: " + coreCount);
         ExecutorService service = Executors.newFixedThreadPool(coreCount);
         for (int i = 0; i < coreCount; i++) {
             service.execute(new CpuIntensiveTask());
         }
-    }
-
-    static class CpuIntensiveTask implements Runnable {
-
-        @Override
-        public void run() {
-            try {
-                new RecursivelyMachine().searchAllLinks("https://tretton37.com/");
-                Thread.sleep(Duration.ofSeconds(2).toMillis());
-            } catch (InterruptedException e) {
-                logger.error(e.getMessage() + e);
-            }
-        }
+        /*
+        RecursivelyMachineSaverImpl recursivelyMachineSaver = new RecursivelyMachineSaverImpl();
+        recursivelyMachineSaver.getOnlyUrlText("https://tretton37.com/assets/i/join.jpg");
+         */
     }
 }

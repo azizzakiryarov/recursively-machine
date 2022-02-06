@@ -1,0 +1,87 @@
+package se.azza.recursivelymachine.service;
+
+import org.apache.log4j.Logger;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class RecursivelyMachineSaverImpl implements RecursivelyMachineSaver {
+
+    static Logger logger = Logger.getLogger(String.valueOf(RecursivelyMachineSaverImpl.class));
+
+    @Override
+    public void downloadHtml(String webpage) {
+        createDir(webpage);
+        if (Files.notExists(Path.of(webpage))) {
+            try {
+                // Create URL object
+                URL url = new URL(webpage);
+                BufferedReader readr = new BufferedReader(new InputStreamReader(url.openStream()));
+
+                // Enter filename in which you want to download
+                BufferedWriter writer = new BufferedWriter(new FileWriter(webpage + ".html"));
+
+                // read each line from stream till end
+                String line;
+                while ((line = readr.readLine()) != null) {
+                    writer.write(line);
+                }
+                readr.close();
+                writer.close();
+                logger.info("Successfully Downloaded.");
+            } catch (MalformedURLException mue) {
+                logger.error("Malformed URL Exception raised" + mue);
+            } catch (IOException ie) {
+                logger.error("IOException raised" + ie);
+            }
+        }
+    }
+
+    @Override
+    public void createDir(String dir) {
+        String projectDir = System.getProperty("user.dir");
+        String rootDir = projectDir + "/https://tretton37.com/";
+
+        if (Files.notExists(Path.of(rootDir))) {
+            try {
+                logger.info("Trying to create directory: " + rootDir);
+                Files.createDirectories(Path.of(rootDir));
+                logger.info("Directory is created directory: " + rootDir);
+            } catch (IOException e) {
+                logger.error(e.getMessage() + e);
+            }
+        } else {
+            try {
+                logger.info("Trying to create directory: " + dir);
+                Files.createDirectories(Path.of(getOnlyUrlText(dir)));
+                logger.info("Directory is created directory: " + dir);
+            } catch (IOException e) {
+                logger.error(e.getMessage() + e);
+            }
+        }
+    }
+
+    @Override
+    public void downloadResource(String url) {
+        createDir(url);
+        try (InputStream in = URI.create(url).toURL().openStream()) {
+            if (Files.notExists(Path.of(url))) {
+                Files.copy(in, Paths.get(url).toAbsolutePath());
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage() + e);
+        }
+    }
+
+    @Override
+    public String getOnlyUrlText(String urlText) {
+        int index=urlText.lastIndexOf('/');
+        System.out.println(urlText.substring(0,index));
+        return urlText.substring(0,index);
+    }
+}
