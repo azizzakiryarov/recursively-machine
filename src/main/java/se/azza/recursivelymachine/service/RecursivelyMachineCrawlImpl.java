@@ -44,7 +44,7 @@ public class RecursivelyMachineCrawlImpl implements RecursivelyMachineCrawl {
             }
             pagesToVisit.addAll(getLinks());
         }
-        logger.info("***Done** Visited " + pagesVisited.size() + " web page(s)");
+        logger.info("***Done** Visited " + getLinks().size() + " web page(s)");
     }
 
     /**

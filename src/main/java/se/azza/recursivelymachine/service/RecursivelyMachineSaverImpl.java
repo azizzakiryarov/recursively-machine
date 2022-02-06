@@ -1,6 +1,8 @@
 package se.azza.recursivelymachine.service;
 
 import org.apache.log4j.Logger;
+import se.azza.recursivelymachine.utility.UriUtility;
+import se.azza.recursivelymachine.utility.UrlUtility;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -19,19 +21,14 @@ public class RecursivelyMachineSaverImpl implements RecursivelyMachineSaver {
         createDir(webpage);
         if (Files.notExists(Path.of(webpage))) {
             try {
-                // Create URL object
                 URL url = new URL(webpage);
-                BufferedReader readr = new BufferedReader(new InputStreamReader(url.openStream()));
-
-                // Enter filename in which you want to download
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
                 BufferedWriter writer = new BufferedWriter(new FileWriter(webpage + ".html"));
-
-                // read each line from stream till end
                 String line;
-                while ((line = readr.readLine()) != null) {
+                while ((line = reader.readLine()) != null) {
                     writer.write(line);
                 }
-                readr.close();
+                reader.close();
                 writer.close();
                 logger.info("Successfully Downloaded.");
             } catch (MalformedURLException mue) {
@@ -58,7 +55,7 @@ public class RecursivelyMachineSaverImpl implements RecursivelyMachineSaver {
         } else {
             try {
                 logger.info("Trying to create directory: " + dir);
-                Files.createDirectories(Path.of(getOnlyUrlText(dir)));
+                Files.createDirectories(Path.of(UrlUtility.getOnlyUrlText(dir)));
                 logger.info("Directory is created directory: " + dir);
             } catch (IOException e) {
                 logger.error(e.getMessage() + e);
@@ -69,19 +66,14 @@ public class RecursivelyMachineSaverImpl implements RecursivelyMachineSaver {
     @Override
     public void downloadResource(String url) {
         createDir(url);
-        try (InputStream in = URI.create(url).toURL().openStream()) {
-            if (Files.notExists(Path.of(url))) {
-                Files.copy(in, Paths.get(url).toAbsolutePath());
+        if (UriUtility.isUriAbsolute(url)) {
+            try (InputStream in = URI.create(url).toURL().openStream()) {
+                if (Files.notExists(Path.of(url))) {
+                    Files.copy(in, Paths.get(url).toAbsolutePath());
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage() + e);
             }
-        } catch (IOException e) {
-            logger.error(e.getMessage() + e);
         }
-    }
-
-    @Override
-    public String getOnlyUrlText(String urlText) {
-        int index=urlText.lastIndexOf('/');
-        System.out.println(urlText.substring(0,index));
-        return urlText.substring(0,index);
     }
 }

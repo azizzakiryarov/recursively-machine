@@ -9,7 +9,4 @@ public interface RecursivelyMachineSaver {
     void downloadHtml(String webpage) throws IOException;
 
     void createDir(String url);
-
-    String getOnlyUrlText(String urlText);
-
 }

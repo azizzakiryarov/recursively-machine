@@ -2,7 +2,6 @@ package se.azza.recursivelymachine.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.log4j.Logger;
 
 import java.util.HashSet;
