@@ -13,7 +13,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Safelist;
 import org.jsoup.select.Elements;
 import org.apache.log4j.Logger;
+import se.azza.recursivelymachine.model.RecursivelyMachine;
 
+import static se.azza.recursivelymachine.utility.PrintUtility.*;
 
 public class RecursivelyMachineCrawlImpl implements RecursivelyMachineCrawl {
 
@@ -22,9 +24,10 @@ public class RecursivelyMachineCrawlImpl implements RecursivelyMachineCrawl {
     // We'll use a fake USER_AGENT so the web server thinks the robot is a normal web browser.
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.112 Safari/535.1";
     private final Set<String> links = new HashSet<>();
-    private final Set<String> pagesVisited = new HashSet<>();
-    private final Set<String> pagesToVisit = new HashSet<>();
-    RecursivelyMachineSaverImpl recursivelyMachineSaver = new RecursivelyMachineSaverImpl();
+    private final RecursivelyMachine recursivelyMachine = new RecursivelyMachine();
+    private final RecursivelyMachineSaverImpl recursivelyMachineSaver = new RecursivelyMachineSaverImpl();
+    private final Set<String> pagesVisited = recursivelyMachine.getPagesVisited();
+    private final Set<String> pagesToVisit = recursivelyMachine.getPagesToVisit();
 
     /**
      * Here we are going to get all links from our website
@@ -88,55 +91,50 @@ public class RecursivelyMachineCrawlImpl implements RecursivelyMachineCrawl {
             Elements imports = doc.select("link[href]");
             Elements docs = doc.select("a[href]");
 
-            print("\nMedia: (%d)", media.size());
-            for (Element src : media) {
-                if (src.tagName().equals("img")) {
-                    print(" * %s: <%s> %sx%s (%s)",
-                            src.tagName(), src.attr("abs:src"), src.attr("width"), src.attr("height"),
-                            trim(src.attr("alt"), 20));
-                    logger.info(src.attr("abs:src"));
-                    recursivelyMachineSaver.downloadResource(src.attr("abs:src"));
-                } else {
-                    print(" * %s: <%s>", src.tagName(), src.attr("abs:src"));
-                    logger.info(src.attr("abs:src"));
-                    recursivelyMachineSaver.downloadResource(src.attr("abs:src"));
-                }
-            }
+            getAndDownloadMedia(media);
+            getAndDownloadImports(imports);
+            getAndDownloadDocs(docs, url);
+        }
+    }
 
-            print("\nImports: (%d)", imports.size());
-            for (Element link : imports) {
-                print(" * %s <%s> (%s)", link.tagName(), link.attr("abs:href"), link.attr("rel"));
-                logger.info(link.attr("abs:src"));
-                recursivelyMachineSaver.downloadResource(link.attr("abs:src"));
-            }
-
-            print("\nLinks: (%d)", docs.size());
-            for (Element link : docs) {
-                print(" * a: <%s> (%s)", link.attr("abs:href"), trim(link.text(), 35));
-                recursivelyMachineSaver.downloadHtml(link.attr("abs:src"));
-                String href = link.attr("abs:href");
-                URL hrefURL = null;
-                try {
-                    hrefURL = new URL(href);
-                } catch (MalformedURLException e) {
-                    logger.error(e.getMessage() + e);
-                }
-                if (hrefURL != null && hrefURL.getHost().equals(new URL(url).getHost())) {
-                    crawling(href);
-                }
+    private void getAndDownloadMedia(Elements media){
+        print("\nMedia: (%d)", media.size());
+        for (Element src : media) {
+            if (src.tagName().equals("img")) {
+                loggerInfoThreadAndUrl(src);
+                recursivelyMachineSaver.downloadResource(src.attr("abs:src"));
+            } else {
+                loggerInfoThreadAndUrl(src);
+                recursivelyMachineSaver.downloadResource(src.attr("abs:src"));
             }
         }
     }
 
-    private static void print(String msg, Object... args) {
-        logger.info(String.format(msg, args));
+
+    private void getAndDownloadImports(Elements imports) {
+        print("\nImports: (%d)", imports.size());
+        for (Element link : imports) {
+            loggerInfoThreadAndUrl(link);
+            recursivelyMachineSaver.downloadResource(link.attr("abs:src"));
+        }
     }
 
-    private static String trim(String s, int width) {
-        if (s.length() > width)
-            return s.substring(0, width - 1) + ".";
-        else
-            return s;
+    private void getAndDownloadDocs(Elements docs, String url) throws IOException {
+        print("\nLinks: (%d)", docs.size());
+        for (Element doc : docs) {
+            loggerInfoThreadAndUrl(doc);
+            recursivelyMachineSaver.downloadHtml(doc.attr("abs:src"));
+            String href = doc.attr("abs:href");
+            URL hrefURL = null;
+            try {
+                hrefURL = new URL(href);
+            } catch (MalformedURLException e) {
+                logger.error(e.getMessage() + e);
+            }
+            if (hrefURL != null && hrefURL.getHost().equals(new URL(url).getHost())) {
+                crawling(href);
+            }
+        }
     }
 
     public Set<String> getLinks() {

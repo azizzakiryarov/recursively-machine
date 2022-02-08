@@ -17,20 +17,37 @@ public class RecursivelyMachineSaverImpl implements RecursivelyMachineSaver {
     static Logger logger = Logger.getLogger(String.valueOf(RecursivelyMachineSaverImpl.class));
 
     @Override
+    public void downloadResource(String url) {
+        createDir(url);
+        if (UriUtility.isUriAbsolute(url)) {
+            try (InputStream in = URI.create(url).toURL().openStream()) {
+                if (Files.notExists(Path.of(url))) {
+                    logger.info("Trying to download: " + url);
+                    Files.copy(in, Paths.get(url).toAbsolutePath());
+                    logger.info("Successfully downloaded: " + url);
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage() + e);
+            }
+        }
+    }
+
+    @Override
     public void downloadHtml(String webpage) {
         createDir(webpage);
         if (Files.notExists(Path.of(webpage))) {
             try {
+                logger.info("Trying to download: " + webpage);
                 URL url = new URL(webpage);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-                BufferedWriter writer = new BufferedWriter(new FileWriter(webpage + ".html"));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(webpage));
                 String line;
                 while ((line = reader.readLine()) != null) {
                     writer.write(line);
                 }
                 reader.close();
                 writer.close();
-                logger.info("Successfully Downloaded.");
+                logger.info("Successfully Downloaded: " + webpage);
             } catch (MalformedURLException mue) {
                 logger.error("Malformed URL Exception raised" + mue);
             } catch (IOException ie) {
@@ -63,17 +80,4 @@ public class RecursivelyMachineSaverImpl implements RecursivelyMachineSaver {
         }
     }
 
-    @Override
-    public void downloadResource(String url) {
-        createDir(url);
-        if (UriUtility.isUriAbsolute(url)) {
-            try (InputStream in = URI.create(url).toURL().openStream()) {
-                if (Files.notExists(Path.of(url))) {
-                    Files.copy(in, Paths.get(url).toAbsolutePath());
-                }
-            } catch (IOException e) {
-                logger.error(e.getMessage() + e);
-            }
-        }
-    }
 }

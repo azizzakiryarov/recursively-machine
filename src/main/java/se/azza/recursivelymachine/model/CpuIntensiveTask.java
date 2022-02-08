@@ -1,6 +1,5 @@
 package se.azza.recursivelymachine.model;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.apache.log4j.Logger;
 import se.azza.recursivelymachine.service.RecursivelyMachineCrawlImpl;
