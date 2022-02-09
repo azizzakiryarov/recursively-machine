@@ -11,12 +11,11 @@ import java.time.Duration;
 public class CpuIntensiveTask  implements Runnable{
 
     static Logger logger = Logger.getLogger(String.valueOf(CpuIntensiveTask.class));
-    RecursivelyMachineCrawlImpl recursivelyMachineCrawlImpl = new RecursivelyMachineCrawlImpl();
 
     @Override
     public void run() {
         try {
-            recursivelyMachineCrawlImpl.searchValidLinks("https://tretton37.com/");
+            new RecursivelyMachineCrawlImpl().searchValidLinks("https://tretton37.com/");
             Thread.sleep(Duration.ofSeconds(2).toMillis());
         } catch (InterruptedException | IOException e) {
             logger.error(e.getMessage() + e);

@@ -140,4 +140,8 @@ public class RecursivelyMachineCrawlImpl implements RecursivelyMachineCrawl {
     public Set<String> getLinks() {
         return this.links;
     }
+
+    public Set<String> getPagesToVisit() {
+        return pagesToVisit;
+    }
 }
